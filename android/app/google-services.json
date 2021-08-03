@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "661726863280",
+    "project_id": "dgmentor-app",
+    "storage_bucket": "dgmentor-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:661726863280:android:64c7d421eabfa83b6a0075",
+        "android_client_info": {
+          "package_name": "com.example.first_dgapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "661726863280-60plpcjq1d6srtaftqq6t1j266qj3n76.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZFboIOE4XFY88q4mvBt0VZr2oNfheMhE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "661726863280-60plpcjq1d6srtaftqq6t1j266qj3n76.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
