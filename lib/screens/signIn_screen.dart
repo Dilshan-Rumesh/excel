@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:first_dgapp/constants.dart';
 import 'package:first_dgapp/screens/body.dart';
 import 'package:first_dgapp/screens/rounded_button.dart';
@@ -70,6 +71,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
           );
         });
   }
+
+  Future uploadImageToFirebase(BuildContext context) async {
+    String fileName = (_image.path);
+    StorageReference firebaseStorageRef =
+        FirebaseStorage.instance.ref().child('uploadNew/$fileName');
+    StorageUploadTask uploadTask = firebaseStorageRef.putFile(_image);
+    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+    taskSnapshot.ref.getDownloadURL().then((value) {
+      print("Done: $value");
+      imageUrl = value;
+    });
+  }
   //
 
   String selectedDepartment = 'Non';
@@ -87,6 +100,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String department;
   String gender;
   String eduction;
+  String imageUrl;
   final _firestore = Firestore.instance;
 
   FirebaseUser loggedInUser;
@@ -448,6 +462,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             password: password,
                           );
 
+                          uploadImageToFirebase(context);
+
                           if (user != null) {
                             _firestore.collection('Users').add({
                               'first name': fname,
@@ -462,8 +478,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               'gender': selectedGendar,
                               'phone no': phoneNo,
                               'user code': uCode,
-                              'image': _image,
+                              'image': imageUrl,
                             });
+
                             // Navigator.push(
                             //   context,
                             //   MaterialPageRoute(builder: (context) => Body()),
