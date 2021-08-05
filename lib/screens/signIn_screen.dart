@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:first_dgapp/constants.dart';
 import 'package:first_dgapp/screens/body.dart';
@@ -8,6 +10,7 @@ import 'package:first_dgapp/widgets/rounded_password_textfield.dart';
 import 'package:first_dgapp/widgets/rounded_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 
 class RegistrationPage extends StatefulWidget {
   static const String id = 'regpage';
@@ -18,7 +21,57 @@ class RegistrationPage extends StatefulWidget {
 DateTime date;
 
 class _RegistrationPageState extends State<RegistrationPage> {
+  File _image;
+
+  Future _imgFromCamera() async {
+    final image = await ImagePicker.pickImage(
+        source: ImageSource.camera, imageQuality: 50);
+
+    setState(() {
+      _image = image;
+    });
+  }
+
+  _imgFromGallery() async {
+    final image = await ImagePicker.pickImage(
+        source: ImageSource.gallery, imageQuality: 50);
+
+    setState(() {
+      _image = image;
+    });
+  }
+
+  void _showPicker(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Photo Library'),
+                      onTap: () {
+                        _imgFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                  new ListTile(
+                    leading: new Icon(Icons.photo_camera),
+                    title: new Text('Camera'),
+                    onTap: () {
+                      _imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
   //
+
   String selectedDepartment = 'Non';
   String selectedGendar = 'Male';
   String selectedEducation = 'Non';
@@ -124,21 +177,81 @@ class _RegistrationPageState extends State<RegistrationPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Center(
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundImage: AssetImage('assets/user.png'),
-                  // child: CircleAvatar(
-                  //   radius: 20,
-                  //   backgroundColor: Color(0XFFBDBDBD),
-                  //   child: Icon(
-                  //     Icons.camera_enhance_rounded,
-                  //     color: Colors.black,
-                  //   ),
-                  // ),
+                child: GestureDetector(
+                  onTap: () {
+                    _showPicker(context);
+                  },
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundImage: AssetImage('assets/user.png'),
+                    child: _image != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: Image.file(
+                              _image,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.fitWidth,
+                            ),
+                          )
+                        : Align(
+                            alignment: Alignment(1, 1),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(50)),
+                              width: 40,
+                              height: 40,
+                              child: Icon(
+                                Icons.camera_alt,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                          ),
+                    // _image != null ? _image : AssetImage('assets/user.png'),
+                    // child: Align(
+                    //   alignment: Alignment(1, 1),
+                    //   child: CircleAvatar(
+                    //     // radius: 20,
+                    //     // backgroundColor: Color(0XFFBDBDBD),
+                    //     child: GestureDetector(
+                    //       onTap: () {
+                    //         _showPicker(context);
+                    //       },
+                    //       child: CircleAvatar(
+                    //         radius: 55,
+                    //         backgroundColor: Color(0xffFDCF09),
+                    //         // child: _image != null
+                    //         //     ? ClipRRect(
+                    //         //         borderRadius: BorderRadius.circular(50),
+                    //         //         child: Image.file(
+                    //         //           _image,
+                    //         //           width: 100,
+                    //         //           height: 100,
+                    //         //           fit: BoxFit.fitWidth,
+
+                    //         //         ),
+                    //         //       )
+                    //         //     : Container(
+                    //         //         decoration: BoxDecoration(
+                    //         //             color: Colors.grey[200],
+                    //         //             borderRadius: BorderRadius.circular(50)),
+                    //         //         width: 100,
+                    //         //         height: 100,
+                    //         //         child: Icon(
+                    //         //           Icons.camera_alt,
+                    //         //           color: Colors.grey[800],
+                    //         //         ),
+                    //         //       ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                  ),
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(top: 20),
+                margin: EdgeInsets.only(top: 20, bottom: 20),
                 child: Text(
                   'Register',
                   style: TextStyle(
@@ -336,10 +449,25 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           );
 
                           if (user != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Body()),
-                            );
+                            _firestore.collection('Users').add({
+                              'first name': fname,
+                              'last name': lname,
+                              'birthday': date,
+                              'email': email,
+                              'confirm email': email,
+                              'password': password,
+                              'confirm password': password,
+                              'department': selectedDepartment,
+                              'education': selectedEducation,
+                              'gender': selectedGendar,
+                              'phone no': phoneNo,
+                              'user code': uCode,
+                              'image': _image,
+                            });
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(builder: (context) => Body()),
+                            // );
                           }
                         } catch (e) {
                           print(e);
